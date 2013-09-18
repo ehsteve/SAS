@@ -19,7 +19,7 @@ int main()
 
     while(1)    // run forever
     {
-        usleep(500000);
+        usleep(50000);
 
         count++;
         TelemetryPacket tp(TM_SAS_GENERIC, TARGET_ID_SAS);
@@ -99,7 +99,7 @@ int main()
         tp << (float)-6; //Y slope
 
         //Image max and min
-        tp << (uint8_t) 255; //max
+        tp << (uint8_t) rand()/(float)RAND_MAX*255; //max
 
         //Tacking on the offset numbers intended for CTL
         tp << (float)(((float)(count % 13)-7)/700+0.5); //azimuth offset
@@ -113,6 +113,7 @@ int main()
             bitwrite(&temp, 4, 4, 1+7);
             tp << (uint8_t)temp;
         }
+        tp.setTimeAndFinish();
         
         std::cout << tp << std::endl;
         std::cout << "Packet size: " << tp.getReadIndex()+tp.remainingBytes() << std::endl;

@@ -12,16 +12,21 @@
 
 int main(int argc, char *argv[])
 {
-    if(argc != 3) {
-        std::cerr << "Calling sequence: playback <IP address> <filename>\n";
+    if(argc < 3) {
+        std::cerr << "Calling sequence: playback <IP address> <filename> (speed factor)\n";
         return 1;
     }
 
+	int speed_factor;
     TelemetryPacketQueue tpq;
     tpq.filterSourceID(0x30);
     tpq.add_file(argv[2]);
-
-    std::cout << "Playing back " << tpq.size() << " SAS telemetry packets at " << SPEED_FACTOR << "x speed\n";
+	
+	if(argc == 4) {
+		speed_factor = atoi(argv[3]);
+	} else speed_factor = SPEED_FACTOR;
+	
+    std::cout << "Playing back " << tpq.size() << " SAS telemetry packets at " << speed_factor << "x speed\n";
 
     TelemetrySender telSender(argv[1], PORT_TM);
 
@@ -48,10 +53,10 @@ int main(int argc, char *argv[])
 
         clock_gettime(CLOCK_MONOTONIC, &run_mark);
         run_diff = TimespecDiff(run_start, run_mark);
-        if(SPEED_FACTOR != 1) {
-            run_diff.tv_sec = run_diff.tv_sec*SPEED_FACTOR+
-                              (int)(run_diff.tv_nsec*SPEED_FACTOR/1000000000);
-            run_diff.tv_nsec = (run_diff.tv_nsec*SPEED_FACTOR) % 1000000000;
+        if(speed_factor != 1) {
+            run_diff.tv_sec = run_diff.tv_sec*speed_factor+
+                              (int)(run_diff.tv_nsec*speed_factor/1000000000);
+            run_diff.tv_nsec = (run_diff.tv_nsec*speed_factor) % 1000000000;
         }
 
         wait = TimespecDiff(run_diff, tm_diff);
