@@ -1,31 +1,32 @@
-#define SPEED_FACTOR 2
-
 #define PORT_TM 2003
 
 #include <iostream>
 #include <ctime>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "UDPSender.hpp"
 #include "Telemetry.hpp"
 #include "utilities.hpp"
 
+int speed_factor = 2;
+
 int main(int argc, char *argv[])
 {
-    if(argc < 3) {
-        std::cerr << "Calling sequence: playback <IP address> <filename> (speed factor)\n";
-        return 1;
+    switch(argc) {
+        case 4:
+            speed_factor = atoi(argv[3]);
+        case 3:
+            break;
+        default:
+            std::cerr << "Calling sequence: playback <IP address> <filename> [speed factor]\n";
+            return 1;
     }
 
-	int speed_factor;
     TelemetryPacketQueue tpq;
     tpq.filterSourceID(0x30);
     tpq.add_file(argv[2]);
-	
-	if(argc == 4) {
-		speed_factor = atoi(argv[3]);
-	} else speed_factor = SPEED_FACTOR;
-	
+
     std::cout << "Playing back " << tpq.size() << " SAS telemetry packets at " << speed_factor << "x speed\n";
 
     TelemetrySender telSender(argv[1], PORT_TM);
